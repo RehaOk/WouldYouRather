@@ -4,10 +4,27 @@ import AppBarContainer from "./containers/AppBarContainer";
 import LoginContainer from "./containers/LoginContainer";
 import QuestionContainer from "./containers/QuestionContainer";
 import ResultContainer from "./containers/ResultContainer";
-import { Switch, Route } from "react-router-dom";
+import CreateQuestionContainer from "./containers/CreateQuestionContainer";
+import LeaderboardContainer from "./containers/LeaderboardContainer";
+import { Switch, Route, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import React from "react";
 import * as actions from "./redux/actions";
+
+const RenderGuard = (props) => {
+  if (props.isLoggedIn) {
+    return props.children;
+  } else {
+    return (
+      <Redirect
+        to={{
+          pathname: `/redirect${window.location.pathname}`,
+        }}
+      />
+    );
+  }
+};
+
 class App extends React.Component {
   render() {
     return (
@@ -17,20 +34,33 @@ class App extends React.Component {
           <Route exact path="/">
             <LoginContainer />
           </Route>
+          <Route path="/redirect/:path">
+            <LoginContainer />
+          </Route>
           <Route exact path="/home">
-            <HomeContainer />
+            <RenderGuard isLoggedIn={this.props.isLoggedIn}>
+              <HomeContainer />
+            </RenderGuard>
           </Route>
           <Route exact path="/add">
-            <>New Question</>
+            <RenderGuard isLoggedIn={this.props.isLoggedIn}>
+              <CreateQuestionContainer />
+            </RenderGuard>
           </Route>
           <Route exact path="/questions/:id">
-            <QuestionContainer />
+            <RenderGuard isLoggedIn={this.props.isLoggedIn}>
+              <QuestionContainer />
+            </RenderGuard>
           </Route>
           <Route exact path="/results/:id">
-            <ResultContainer />
+            <RenderGuard isLoggedIn={this.props.isLoggedIn}>
+              <ResultContainer />
+            </RenderGuard>
           </Route>
           <Route exact path="/leaderboard">
-            <>LeaderBoard</>
+            <RenderGuard isLoggedIn={this.props.isLoggedIn}>
+              <LeaderboardContainer />
+            </RenderGuard>
           </Route>
         </Switch>
       </>
@@ -38,4 +68,10 @@ class App extends React.Component {
   }
 }
 
-export default App;
+const mapStateToProps = (state) => {
+  return {
+    isLoggedIn: state.authReducer.isLoggedIn,
+  };
+};
+
+export default connect(mapStateToProps)(App);

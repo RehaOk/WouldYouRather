@@ -60,7 +60,7 @@ class AppBarContainer extends React.Component {
             {this.props.isLoggedIn && (
               <>
                 <div className={classes.titleSpacing}>
-                  <Link to="/">
+                  <Link to="/home">
                     <Typography variant="h6" className={classes.title}>
                       Home
                     </Typography>

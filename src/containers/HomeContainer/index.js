@@ -19,6 +19,7 @@ const useStyles = () => ({
 class HomeContainer extends React.Component {
   state = {
     value: 0,
+    componentMountToggle: false,
   };
 
   handleChange = (event, newValue) => {
@@ -26,75 +27,81 @@ class HomeContainer extends React.Component {
   };
 
   componentDidMount = () => {
-    this.categorizeQuestions().then((questions) => {
-      this.getUsers().then((users) => {
+    this.props.actions.getUsers();
+    this.props.actions.getQuestions();
+    this.setState({ componentMountToggle: !this.state.componentMountToggle });
+  };
+  componentDidUpdate(prevProps, prevState) {
+    if (
+      this.state.componentMountToggle !== prevState.componentMountToggle ||
+      (JSON.stringify(prevProps.questions) !==
+        JSON.stringify(this.props.questions) &&
+        Object.keys(this.props.questions).length !== 0 &&
+        this.props.users)
+    ) {
+      this.categorizeQuestions().then((questions) => {
         questions.unAnsweredQuestions.forEach((question) => {
-          question.avatarURL = users[question.author].avatarURL;
+          question.avatarURL = this.props.users[question.author].avatarURL;
         });
         questions.answeredQuestions.forEach((question) => {
-          question.avatarURL = users[question.author].avatarURL;
+          question.avatarURL = this.props.users[question.author].avatarURL;
         });
-        this.setState({ ...questions });
-        this.props.addQuestions({
-          questions: [
+        if (questions.answeredQuestions && questions.unAnsweredQuestions) {
+          this.setState({ ...questions });
+          let formatArray = [
             ...questions.unAnsweredQuestions,
             ...questions.answeredQuestions,
-          ],
-        });
+          ];
+          let formattedQuestions = {};
+          formatArray.forEach((item) => {
+            formattedQuestions[item.id] = item;
+          });
+          this.props.actions.addQuestions({
+            questions: {
+              ...formattedQuestions,
+            },
+          });
+        }
       });
-    });
-  };
-
-  getUsers = () => {
-    return new Promise((resolve) => {
-      data._getUsers().then((users) => {
-        resolve(users);
-      });
-    });
-  };
+    }
+  }
 
   categorizeQuestions() {
     return new Promise((resolve) => {
       let unAnsweredQuestions = [];
       let answeredQuestions = [];
-      data._getQuestions().then((questions) => {
-        unAnsweredQuestions = Object.keys(questions)
-          .map((key) => {
-            return questions[key];
-          })
-          .filter((question) => {
-            if (
-              !question.optionOne.votes.includes(this.props.authUser.id) &&
-              !question.optionTwo.votes.includes(this.props.authUser.id)
-            ) {
-              return true;
-            }
-          })
-          .sort(function (question1, question2) {
-            return (
-              new Date(question1.timestamp) - new Date(question2.timestamp)
-            );
-          });
+      unAnsweredQuestions = Object.keys(this.props.questions)
+        .map((key) => {
+          return this.props.questions[key];
+        })
+        .filter((question) => {
+          if (
+            !question.optionOne.votes.includes(this.props.authUser.id) &&
+            !question.optionTwo.votes.includes(this.props.authUser.id)
+          ) {
+            return true;
+          }
+        })
+        .sort(function (question1, question2) {
+          return new Date(question1.timestamp) - new Date(question2.timestamp);
+        });
 
-        answeredQuestions = Object.keys(questions)
-          .map((key) => {
-            return questions[key];
-          })
-          .filter((question) => {
-            if (
-              question.optionOne.votes.includes(this.props.authUser.id) ||
-              question.optionTwo.votes.includes(this.props.authUser.id)
-            ) {
-              return true;
-            }
-          })
-          .sort(function (question1, question2) {
-            return (
-              new Date(question1.timestamp) - new Date(question2.timestamp)
-            );
-          });
-        resolve({ unAnsweredQuestions, answeredQuestions });
-      });
+      answeredQuestions = Object.keys(this.props.questions)
+        .map((key) => {
+          return this.props.questions[key];
+        })
+        .filter((question) => {
+          if (
+            question.optionOne.votes.includes(this.props.authUser.id) ||
+            question.optionTwo.votes.includes(this.props.authUser.id)
+          ) {
+            return true;
+          }
+        })
+        .sort(function (question1, question2) {
+          return new Date(question1.timestamp) - new Date(question2.timestamp);
+        });
+      resolve({ unAnsweredQuestions, answeredQuestions });
     });
   }
 
@@ -149,13 +156,23 @@ const mapStateToProps = (state) => {
   return {
     isLoggedIn: state.authReducer.isLoggedIn,
     authUser: state.authReducer.authUser,
+    users: state.userReducer.users,
+    questions: state.questionReducer.questions,
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    addQuestions: (payload) => {
-      dispatch(actions.addQuestions(payload));
+    actions: {
+      addQuestions: (payload) => {
+        dispatch(actions.addQuestions(payload));
+      },
+      getUsers: () => {
+        dispatch(actions.getUsers());
+      },
+      getQuestions: () => {
+        dispatch(actions.getQuestions());
+      },
     },
   };
 };

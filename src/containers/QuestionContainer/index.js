@@ -15,15 +15,15 @@ class QuestionContainer extends React.Component {
     return (
       <>
         {this.props.questions &&
-          this.props.questions.map((question) => {
-            if (question.id === id) {
+          Object.keys(this.props.questions).map((questionKey) => {
+            if (this.props.questions[questionKey].id === id) {
               return (
                 <PollAnswerCard
-                  questionId={question.id}
-                  author={question.author}
-                  avatarURL={question.avatarURL}
-                  optionOne={question.optionOne.text}
-                  optionTwo={question.optionTwo.text}
+                  questionId={this.props.questions[questionKey].id}
+                  author={this.props.questions[questionKey].author}
+                  avatarURL={this.props.questions[questionKey].avatarURL}
+                  optionOne={this.props.questions[questionKey].optionOne.text}
+                  optionTwo={this.props.questions[questionKey].optionTwo.text}
                 />
               );
             } else {

@@ -19,7 +19,7 @@ import Badge from "@material-ui/core/Badge";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Box from "@material-ui/core/Box";
 
-import * as data from "../_DATA";
+import * as actions from "../redux/actions";
 
 const useStyles = () => ({
   root: {
@@ -92,33 +92,51 @@ class PollAnswerCard extends React.Component {
 
   submit = (questionId) => {
     // this.props.history.push(`questions/${questionId}`);
-    data._saveQuestionAnswer({
+    this.props.actions.saveQuestionAnswer({
       authedUser: this.props.authUser.id,
       qid: questionId,
       answer: this.state.answer,
     });
-    this.setState({ renderResult: true });
   };
 
   getResultPercentages = () => {
-    this.props.questions.forEach((question) => {
-      if (question.id === this.props.questionId) {
-        let optOneLen = question.optionOne.votes.length;
-        let optTwoLen = question.optionTwo.votes.length;
+    Object.keys(this.props.questions).forEach((questionKey) => {
+      if (this.props.questions[questionKey].id === this.props.questionId) {
+        let optOneLen =
+          this.props.questions[questionKey].optionOne.votes.length;
+        let optTwoLen =
+          this.props.questions[questionKey].optionTwo.votes.length;
         let total = optOneLen + optTwoLen;
-        let optionOnePercentage = (100 / total) * optOneLen;
-        let optionTwoPercentage = (100 / total) * optTwoLen;
-        this.setState({
-          optionOnePercentage,
-          optionTwoPercentage,
-        });
+        if (total !== 0) {
+          let optionOnePercentage = (100 / total) * optOneLen;
+          let optionTwoPercentage = (100 / total) * optTwoLen;
+          this.setState({
+            optionOnePercentage,
+            optionTwoPercentage,
+          });
+        } else {
+          let optionOnePercentage = (100 / 1) * optOneLen;
+          let optionTwoPercentage = (100 / 1) * optTwoLen;
+          this.setState({
+            optionOnePercentage,
+            optionTwoPercentage,
+          });
+        }
       }
     });
   };
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.renderResult !== this.state.renderResult) {
+    if (
+      JSON.stringify(prevProps.questions) !==
+      JSON.stringify(this.props.questions)
+    ) {
       this.getResultPercentages();
+      this.props.actions.clearSavedQuestionAnswerSuccess();
+      this.setState({ renderResult: true });
+    }
+    if (prevProps.savedQuestionAnswerTo !== this.props.savedQuestionAnswerTo) {
+      this.props.actions.getQuestions(); // get updated votes from questions
     }
   }
 
@@ -236,11 +254,24 @@ const mapStateToProps = (state) => {
   return {
     authUser: state.authReducer.authUser,
     questions: state.questionReducer.questions,
+    savedQuestionAnswerTo: state.questionReducer.savedQuestionAnswerTo,
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
-  return {};
+  return {
+    actions: {
+      saveQuestionAnswer: (payload) => {
+        dispatch(actions.saveQuestionAnswer(payload));
+      },
+      clearSavedQuestionAnswerSuccess: () => {
+        dispatch(actions.clearSavedQuestionAnswerSuccess());
+      },
+      getQuestions: () => {
+        dispatch(actions.getQuestions());
+      },
+    },
+  };
 };
 
 export default connect(

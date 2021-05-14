@@ -86,10 +86,12 @@ class PollAnswerCard extends React.Component {
   };
 
   getResultPercentages = () => {
-    this.props.questions.forEach((question) => {
-      if (question.id === this.props.questionId) {
-        let optOneLen = question.optionOne.votes.length;
-        let optTwoLen = question.optionTwo.votes.length;
+    Object.keys(this.props.questions).forEach((questionKey) => {
+      if (this.props.questions[questionKey].id === this.props.questionId) {
+        let optOneLen =
+          this.props.questions[questionKey].optionOne.votes.length;
+        let optTwoLen =
+          this.props.questions[questionKey].optionTwo.votes.length;
         let total = optOneLen + optTwoLen;
         let optionOnePercentage = (100 / total) * optOneLen;
         let optionTwoPercentage = (100 / total) * optTwoLen;

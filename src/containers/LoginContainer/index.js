@@ -59,6 +59,7 @@ class LoginContainer extends React.Component {
     selectBoxUsers: null,
     users: null,
     selectedUser: "",
+    startCategorizingQuestions: false,
   };
   handleChange = (event) => {
     this.setState({ selectedUser: event.target.value });
@@ -74,32 +75,112 @@ class LoginContainer extends React.Component {
 
   handleSubmit = () => {
     // redux action to set logged in user
-    this.props.createLoginState({
+    this.props.actions.createLoginState({
       isLoggedIn: true,
       authUser: this.state.users[this.state.selectedUser],
     });
-    this.props.history.push("/home");
+    this.setState({ startCategorizingQuestions: true });
   };
 
-  requestUsers = () => {
-    data._getUsers().then((users) => {
-      let reqUsers = [];
-      Object.keys(users).forEach((user) => {
-        reqUsers.push(users[user]);
-      });
-      this.setState({ selectBoxUsers: reqUsers, users });
+  categorizeQuestions() {
+    return new Promise((resolve) => {
+      let unAnsweredQuestions = [];
+      let answeredQuestions = [];
+      unAnsweredQuestions = Object.keys(this.props.questions)
+        .map((key) => {
+          return this.props.questions[key];
+        })
+        .filter((question) => {
+          if (
+            !question.optionOne.votes.includes(this.props.authUser.id) &&
+            !question.optionTwo.votes.includes(this.props.authUser.id)
+          ) {
+            return true;
+          }
+        })
+        .sort(function (question1, question2) {
+          return new Date(question1.timestamp) - new Date(question2.timestamp);
+        });
+
+      answeredQuestions = Object.keys(this.props.questions)
+        .map((key) => {
+          return this.props.questions[key];
+        })
+        .filter((question) => {
+          if (
+            question.optionOne.votes.includes(this.props.authUser.id) ||
+            question.optionTwo.votes.includes(this.props.authUser.id)
+          ) {
+            return true;
+          }
+        })
+        .sort(function (question1, question2) {
+          return new Date(question1.timestamp) - new Date(question2.timestamp);
+        });
+      resolve({ unAnsweredQuestions, answeredQuestions });
     });
-  };
+  }
 
   componentDidMount() {
-    this.requestUsers();
+    // for use of redirected pages
+    this.props.actions.getUsers();
+    this.props.actions.getQuestions();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.users !== this.props.users) {
+      let reqUsers = [];
+      Object.keys(this.props.users).forEach((user) => {
+        reqUsers.push(this.props.users[user]);
+      });
+      this.setState({ selectBoxUsers: reqUsers, users: this.props.users });
+    }
+    if (
+      this.state.startCategorizingQuestions &&
+      this.props.authUser &&
+      JSON.stringify(prevProps.authUser) !== JSON.stringify(this.props.authUser)
+    ) {
+      this.categorizeQuestions().then((questions) => {
+        questions.unAnsweredQuestions.forEach((question) => {
+          question.avatarURL = this.props.users[question.author].avatarURL;
+        });
+        questions.answeredQuestions.forEach((question) => {
+          question.avatarURL = this.props.users[question.author].avatarURL;
+        });
+        if (questions.answeredQuestions && questions.unAnsweredQuestions) {
+          this.setState({ ...questions });
+          let formatArray = [
+            ...questions.unAnsweredQuestions,
+            ...questions.answeredQuestions,
+          ];
+          let formattedQuestions = {};
+          formatArray.forEach((item) => {
+            formattedQuestions[item.id] = item;
+          });
+          this.props.actions.addQuestions({
+            questions: {
+              ...formattedQuestions,
+            },
+          });
+        }
+        // Reset categorizing flag
+        this.setState({ startCategorizingQuestions: false });
+        // Redirect after submit and categorizing questions
+        if (window.location.pathname.split("/")[1] === "redirect") {
+          let rest = window.location.pathname
+            .split("/")
+            .filter((subPath, index) => index !== 0 && subPath !== "redirect")
+            .join("/");
+
+          this.props.history.push(`/${rest}`);
+        } else {
+          this.props.history.push("/home");
+        }
+      });
+    }
   }
 
   render() {
-    if (this.props.isLoggedIn) {
-      this.props.history.push("/home");
-      return null;
-    }
     const { classes } = this.props;
     return (
       <div className={classes.paperContainer}>
@@ -148,14 +229,28 @@ class LoginContainer extends React.Component {
 
 const mapStateToProps = (state) => {
   return {
+    authUser: state.authReducer.authUser,
     isLoggedIn: state.authReducer.isLoggedIn,
+    users: state.userReducer.users,
+    questions: state.questionReducer.questions,
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    createLoginState: (payload) => {
-      dispatch(actions.createLoginState(payload));
+    actions: {
+      createLoginState: (payload) => {
+        dispatch(actions.createLoginState(payload));
+      },
+      addQuestions: (payload) => {
+        dispatch(actions.addQuestions(payload));
+      },
+      getUsers: () => {
+        dispatch(actions.getUsers());
+      },
+      getQuestions: () => {
+        dispatch(actions.getQuestions());
+      },
     },
   };
 };
