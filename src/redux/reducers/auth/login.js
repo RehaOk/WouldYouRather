@@ -5,6 +5,7 @@ const startingState = {
   isLoggedIn: false,
 };
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default function (state = startingState, action) {
   switch (action.type) {
     case actionTypes.CREATE_LOGIN_STATE: {

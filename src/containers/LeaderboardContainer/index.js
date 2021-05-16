@@ -6,7 +6,6 @@ import CardMedia from "@material-ui/core/CardMedia";
 import CardContent from "@material-ui/core/CardContent";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
-import * as data from "../../_DATA";
 import * as actions from "../../redux/actions";
 import { withRouter } from "react-router-dom";
 import Divider from "@material-ui/core/Divider";
@@ -112,7 +111,7 @@ class LeaderboardContainer extends React.Component {
   render() {
     const { classes } = this.props;
     let renderValues = this.state.userScores.map((userScore) => (
-      <Card className={classes.root}>
+      <Card key={userScore.author} className={classes.root}>
         <CardMedia className={classes.cover} image={userScore.avatarURL} />
         <div className={classes.details}>
           <CardContent className={classes.content}>

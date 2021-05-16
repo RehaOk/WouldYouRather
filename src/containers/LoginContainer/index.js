@@ -7,7 +7,6 @@ import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 import Button from "@material-ui/core/Button";
 import Paper from "@material-ui/core/Paper";
-import * as data from "../../_DATA";
 import * as actions from "../../redux/actions";
 import { withRouter } from "react-router-dom";
 import CircularProgress from "@material-ui/core/CircularProgress";

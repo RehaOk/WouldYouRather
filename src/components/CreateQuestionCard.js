@@ -8,7 +8,6 @@ import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
-import { Redirect } from "react-router-dom";
 
 const useStyles = () => ({
   root: {
@@ -57,7 +56,7 @@ class CreateQuestionCard extends React.Component {
               </Typography>
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="h7" component="h5">
+              <Typography variant="h5" component="h5">
                 Complete the question:
               </Typography>
             </Grid>

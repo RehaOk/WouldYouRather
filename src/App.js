@@ -9,7 +9,6 @@ import LeaderboardContainer from "./containers/LeaderboardContainer";
 import { Switch, Route, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import React from "react";
-import * as actions from "./redux/actions";
 
 const RenderGuard = (props) => {
   if (props.isLoggedIn) {

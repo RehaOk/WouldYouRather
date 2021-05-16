@@ -19,7 +19,7 @@ const useStyles = () => ({
 class QuestionContainer extends React.Component {
   render() {
     const { classes } = this.props;
-    const id = this.props.match.params.id;
+    // const id = this.props.match.params.id;
     return (
       <Grid container className={classes.root} spacing={2}>
         <Grid item xs={5}>

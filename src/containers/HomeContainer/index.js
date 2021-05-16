@@ -4,7 +4,6 @@ import { withStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
-import * as data from "../../_DATA";
 import PollQuestionCard from "../../components/PollQuestionCard";
 import PollResultCardQuestion from "../../components/PollResultCardQuestion";
 
@@ -123,30 +122,44 @@ class HomeContainer extends React.Component {
         </Paper>
         {this.state.value === 0 &&
           this.state.unAnsweredQuestions &&
-          this.state.unAnsweredQuestions.map((question) => {
-            return (
-              <PollQuestionCard
-                questionId={question.id}
-                author={question.author}
-                avatarURL={question.avatarURL}
-                optionOne={question.optionOne.text}
-                optionTwo={question.optionTwo.text}
-              />
-            );
-          })}
+          this.state.unAnsweredQuestions
+            .sort(function (question1, question2) {
+              return (
+                new Date(question2.timestamp) - new Date(question1.timestamp)
+              );
+            })
+            .map((question) => {
+              return (
+                <PollQuestionCard
+                  key={question.id}
+                  questionId={question.id}
+                  author={question.author}
+                  avatarURL={question.avatarURL}
+                  optionOne={question.optionOne.text}
+                  optionTwo={question.optionTwo.text}
+                />
+              );
+            })}
         {this.state.value === 1 &&
           this.state.answeredQuestions &&
-          this.state.answeredQuestions.map((question) => {
-            return (
-              <PollResultCardQuestion
-                questionId={question.id}
-                author={question.author}
-                avatarURL={question.avatarURL}
-                optionOne={question.optionOne.text}
-                optionTwo={question.optionTwo.text}
-              />
-            );
-          })}
+          this.state.answeredQuestions
+            .sort(function (question1, question2) {
+              return (
+                new Date(question2.timestamp) - new Date(question1.timestamp)
+              );
+            })
+            .map((question) => {
+              return (
+                <PollResultCardQuestion
+                  key={question.id}
+                  questionId={question.id}
+                  author={question.author}
+                  avatarURL={question.avatarURL}
+                  optionOne={question.optionOne.text}
+                  optionTwo={question.optionTwo.text}
+                />
+              );
+            })}
       </>
     );
   }

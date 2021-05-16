@@ -85,6 +85,8 @@ class PollAnswerCard extends React.Component {
     renderResult: false,
     optionOnePercentage: 0,
     optionTwoPercentage: 0,
+    optionOneVoteCount: 0,
+    optionTwoVoteCount: 0,
   };
   handleChange = (event) => {
     this.setState({ answer: event.target.value });
@@ -107,19 +109,25 @@ class PollAnswerCard extends React.Component {
         let optTwoLen =
           this.props.questions[questionKey].optionTwo.votes.length;
         let total = optOneLen + optTwoLen;
+        let optionOneVoteCount = optOneLen;
+        let optionTwoVoteCount = optTwoLen;
         if (total !== 0) {
           let optionOnePercentage = (100 / total) * optOneLen;
           let optionTwoPercentage = (100 / total) * optTwoLen;
           this.setState({
             optionOnePercentage,
+            optionOneVoteCount,
             optionTwoPercentage,
+            optionTwoVoteCount,
           });
         } else {
           let optionOnePercentage = (100 / 1) * optOneLen;
           let optionTwoPercentage = (100 / 1) * optTwoLen;
           this.setState({
             optionOnePercentage,
+            optionOneVoteCount,
             optionTwoPercentage,
+            optionTwoVoteCount,
           });
         }
       }
@@ -207,6 +215,9 @@ class PollAnswerCard extends React.Component {
                   >
                     <div className={classes.resultContainer}>
                       <Typography>{this.props.optionOne}</Typography>
+                      <Typography>
+                        Vote Count: {this.state.optionOneVoteCount}
+                      </Typography>
                       <LinearProgressWithLabel
                         value={this.state.optionOnePercentage}
                       />
@@ -215,6 +226,9 @@ class PollAnswerCard extends React.Component {
                 ) : (
                   <div className={classes.nonBadge}>
                     <Typography>{this.props.optionOne}</Typography>
+                    <Typography>
+                      Vote Count: {this.state.optionOneVoteCount}
+                    </Typography>
                     <LinearProgressWithLabel
                       value={this.state.optionOnePercentage}
                     />
@@ -228,6 +242,9 @@ class PollAnswerCard extends React.Component {
                   >
                     <div className={classes.resultContainer}>
                       <Typography>{this.props.optionTwo}</Typography>
+                      <Typography>
+                        Vote Count: {this.state.optionTwoVoteCount}
+                      </Typography>
                       <LinearProgressWithLabel
                         value={this.state.optionTwoPercentage}
                       />
@@ -236,6 +253,9 @@ class PollAnswerCard extends React.Component {
                 ) : (
                   <div className={classes.nonBadge}>
                     <Typography>{this.props.optionTwo}</Typography>
+                    <Typography>
+                      Vote Count: {this.state.optionTwoVoteCount}
+                    </Typography>
                     <LinearProgressWithLabel
                       value={this.state.optionTwoPercentage}
                     />
