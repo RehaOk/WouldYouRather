@@ -22,6 +22,7 @@ class QuestionContainer extends React.Component {
               returnedVal = true;
               return (
                 <PollAnswerCard
+                  key={this.props.questions[questionKey].id}
                   questionId={this.props.questions[questionKey].id}
                   author={this.props.questions[questionKey].author}
                   avatarURL={this.props.questions[questionKey].avatarURL}
@@ -33,7 +34,9 @@ class QuestionContainer extends React.Component {
               !returnedVal &&
               Object.keys(this.props.questions).length - 1 === index
             ) {
-              return <ErrorContainer />;
+              return (
+                <ErrorContainer key={this.props.questions[questionKey].id} />
+              );
             }
           })}
       </>

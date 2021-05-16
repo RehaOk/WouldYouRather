@@ -19,6 +19,7 @@ class ResultContainer extends React.Component {
             if (this.props.questions[questionKey].id === id) {
               return (
                 <PollResultCard
+                  key={this.props.questions[questionKey].id}
                   questionId={this.props.questions[questionKey].id}
                   author={this.props.questions[questionKey].author}
                   avatarURL={this.props.questions[questionKey].avatarURL}
